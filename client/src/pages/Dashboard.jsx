@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import StatCard from "../components/StatCard";
@@ -17,73 +17,81 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-const stats = [
-  {
-    title: "Total Influencers",
-    value: "1,248",
-    change: "+12.5%",
-    positive: true,
-    icon: Users,
-  },
-  {
-    title: "Active Campaigns",
-    value: "42",
-    change: "+3",
-    positive: true,
-    icon: Megaphone,
-  },
-  {
-    title: "Customers Acquired",
-    value: "18.5K",
-    change: "+8.2%",
-    positive: true,
-    icon: UserRound,
-  },
-  {
-    title: "Total Revenue",
-    value: "$2.4M",
-    change: "+15.4%",
-    positive: true,
-    icon: DollarSign,
-  },
-  {
-    title: "Repeat Purchase Rate",
-    value: "34.2%",
-    change: "-1.2%",
-    positive: false,
-    icon: RefreshCcw,
-  },
-  {
-    title: "Avg CLV",
-    value: "$845",
-    change: "+4.1%",
-    positive: true,
-    icon: TrendingUp,
-  },
+import { getCampaigns, getDashboardSummary, getCreatorRankings, getReferralSources } from "../services/api";
+
+const statConfig = [
+  { title: "Total Creators", key: "total_creators", icon: Users },
+  { title: "Active Campaigns", key: "total_campaigns", icon: Megaphone },
+  { title: "Customers Acquired", key: "total_purchases", icon: UserRound },
+  { title: "Total Revenue", key: "total_attributed_revenue", icon: DollarSign, formatter: (value) => `$${Number(value).toLocaleString()}` },
+  { title: "Conversion Rate", key: "overall_conversion_rate", icon: RefreshCcw, formatter: (value) => `${Number(value).toFixed(2)}%` },
+  { title: "Referral Clicks", key: "total_referral_clicks", icon: TrendingUp },
 ];
 
 export default function Dashboard() {
+  const [summary, setSummary] = useState(null);
+  const [creators, setCreators] = useState([]);
+  const [campaigns, setCampaigns] = useState([]);
+  const [referralSources, setReferralSources] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadDashboard() {
+      try {
+        setLoading(true);
+        setError("");
+        const [summaryData, creatorsData, campaignsData, referralData] = await Promise.all([
+          getDashboardSummary(),
+          getCreatorRankings(),
+          getCampaigns(),
+          getReferralSources(),
+        ]);
+
+        setSummary(summaryData);
+        setCreators(creatorsData || []);
+        setCampaigns(campaignsData || []);
+        setReferralSources(referralData || []);
+      } catch (err) {
+        setError(err.message || "Failed to load dashboard data.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDashboard();
+  }, []);
+
+  const stats = useMemo(() => {
+    if (!summary) return statConfig.map((item) => ({ ...item, value: "--", change: "Loading...", positive: true, loading: true }));
+
+    return statConfig.map((item) => {
+      const raw = summary[item.key] ?? 0;
+      const value = item.formatter ? item.formatter(raw) : new Intl.NumberFormat().format(raw);
+      return {
+        title: item.title,
+        value,
+        change: item.key === "overall_conversion_rate" ? "Live KPI" : "Updated",
+        positive: true,
+        icon: item.icon,
+        loading: false,
+      };
+    });
+  }, [summary]);
+
   return (
     <div className="min-h-screen bg-[#f8faff] text-slate-800">
       <div className="flex min-h-screen">
-        {/* Sidebar */}
         <Sidebar />
 
-        {/* Main Content */}
         <main className="flex-1 min-w-0">
           <Topbar />
 
           <div className="px-6 py-5">
-            {/* Page Heading */}
             <div className="flex items-start justify-between mb-5">
               <div>
-                <h1 className="text-xl font-semibold text-slate-900">
-                  Dashboard Overview
-                </h1>
-
-                <p className="text-xs text-slate-500 mt-1">
-                  Performance metrics across all active campaigns.
-                </p>
+                <h1 className="text-xl font-semibold text-slate-900">Dashboard Overview</h1>
+                <p className="text-xs text-slate-500 mt-1">Performance metrics across all active campaigns.</p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -98,36 +106,36 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Stats */}
+            {error && (
+              <div className="mb-4 rounded border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                {error}
+              </div>
+            )}
+
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-4">
               {stats.map((stat) => (
                 <StatCard key={stat.title} {...stat} />
               ))}
             </div>
 
-            {/* Charts Row 1 */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-3 mb-3">
               <div className="xl:col-span-2">
-                <CustomerAcquisitionChart />
+                <CustomerAcquisitionChart data={campaigns} loading={loading} />
               </div>
 
-              <ReferralSources />
+              <ReferralSources data={referralSources} loading={loading} />
             </div>
 
-            {/* Charts Row 2 */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 mb-3">
-              <RevenueInfluencers />
-              <RepeatPurchaseChart />
+              <RevenueInfluencers data={creators.slice(0, 5)} loading={loading} />
+              <RepeatPurchaseChart data={campaigns} loading={loading} />
             </div>
 
-            {/* Influencer Table */}
-            <InfluencerTable />
+            <InfluencerTable data={creators} loading={loading} />
           </div>
 
-          {/* Footer */}
           <footer className="border-t border-slate-200 px-6 py-3 flex items-center justify-between text-[10px] text-slate-400">
-            <span>Built with Python • SQL • Pandas • NumPy • Streamlit • GitHub Actions</span>
-
+            <span>Built with Python • SQL • Pandas • NumPy • FastAPI • GitHub Actions</span>
             <div className="flex gap-4">
               <span>Privacy</span>
               <span>Terms</span>
