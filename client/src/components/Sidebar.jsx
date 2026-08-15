@@ -24,7 +24,7 @@ const menuItems = [
     icon: Megaphone,
   },
   {
-    label: "Influencers",
+    label: "Creators",
     icon: Users,
   },
   {
@@ -65,11 +65,11 @@ export default function Sidebar() {
 
           <div>
             <p className="text-[10px] font-bold text-blue-700 leading-none">
-              InfluenceIQ
+              CreatorPulse
             </p>
 
             <p className="text-[7px] text-slate-400 mt-1">
-              SaaS Analytics
+              Campaign Analytics
             </p>
           </div>
         </div>
