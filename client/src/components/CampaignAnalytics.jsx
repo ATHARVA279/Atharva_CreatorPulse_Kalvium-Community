@@ -1,17 +1,6 @@
 import React from "react";
-
-const sidebarItems = [
-  { icon: "▦", label: "Dashboard" },
-  { icon: "▣", label: "Campaign Analytics", active: true },
-  { icon: "♙", label: "Influencers" },
-  { icon: "♧", label: "Customers" },
-  { icon: "↗", label: "Referral Tracking" },
-  { icon: "▤", label: "Revenue Analytics" },
-  { icon: "⌁", label: "CLV" },
-  { icon: "⌘", label: "Retention Analysis" },
-  { icon: "▤", label: "SQL Explorer" },
-  { icon: "⚙", label: "Settings" },
-];
+import Sidebar from "./Sidebar";
+import Topbar from "./Topbar";
 
 const campaigns = [
   {
@@ -42,9 +31,9 @@ const campaigns = [
 
 function RoiChart() {
   return (
-    <div className="relative mt-2 h-[175px] ml-7">
+    <div className="relative mt-2 ml-7 h-[175px]">
 
-      {/* Y-axis labels */}
+      {/* Y Axis */}
       <div className="absolute -left-7 top-1 text-[9px] text-slate-500">
         $50k
       </div>
@@ -57,14 +46,13 @@ function RoiChart() {
         $0
       </div>
 
-      {/* Grid */}
+      {/* Grid lines */}
       <div className="absolute left-0 right-0 top-3 border-t border-dashed border-slate-200" />
 
       <div className="absolute left-0 right-0 top-[85px] border-t border-dashed border-slate-200" />
 
-      <div className="absolute left-0 right-0 bottom-2 border-t border-dashed border-slate-200" />
+      <div className="absolute bottom-2 left-0 right-0 border-t border-dashed border-slate-200" />
 
-      {/* SVG Chart */}
       <svg
         className="absolute inset-x-0 top-3 h-[145px] w-full overflow-visible"
         viewBox="0 0 600 180"
@@ -108,7 +96,7 @@ function RoiChart() {
           fill="url(#roiGradient)"
         />
 
-        {/* Dashed comparison line */}
+        {/* Comparison line */}
         <path
           d="
             M0 145
@@ -125,7 +113,7 @@ function RoiChart() {
           strokeDasharray="12 10"
         />
 
-        {/* Main blue line */}
+        {/* Main line */}
         <path
           d="
             M0 130
@@ -142,13 +130,14 @@ function RoiChart() {
         />
       </svg>
 
-      {/* X axis */}
+      {/* X Axis */}
       <div className="absolute bottom-[-1px] left-0 right-0 flex justify-between text-[9px] text-slate-600">
         <span>Week 1</span>
         <span>Week 2</span>
         <span>Week 3</span>
         <span>Week 4</span>
       </div>
+
     </div>
   );
 }
@@ -167,7 +156,8 @@ function CpaBreakdown() {
           Blended CPA
         </p>
 
-        <div className="mt-0.5 mb-5 flex items-center justify-between">
+        <div className="mb-5 mt-0.5 flex items-center justify-between">
+
           <span className="text-[24px] font-bold leading-none text-slate-800">
             $24.50
           </span>
@@ -175,10 +165,12 @@ function CpaBreakdown() {
           <span className="rounded bg-blue-50 px-1.5 py-1 text-[9px] text-blue-600">
             ↘ 12%
           </span>
+
         </div>
 
         {/* Social Media */}
         <div className="mb-3">
+
           <div className="mb-1 flex justify-between text-[9px] text-slate-700">
             <span>Social Media</span>
             <span>$18.20</span>
@@ -187,10 +179,12 @@ function CpaBreakdown() {
           <div className="h-[5px] overflow-hidden rounded-full bg-indigo-100">
             <div className="h-full w-[58%] bg-blue-700" />
           </div>
+
         </div>
 
         {/* Influencer */}
         <div className="mb-3">
+
           <div className="mb-1 flex justify-between text-[9px] text-slate-700">
             <span>Influencer</span>
             <span>$32.10</span>
@@ -199,10 +193,12 @@ function CpaBreakdown() {
           <div className="h-[5px] overflow-hidden rounded-full bg-indigo-100">
             <div className="h-full w-[78%] bg-blue-700" />
           </div>
+
         </div>
 
         {/* Email */}
         <div>
+
           <div className="mb-1 flex justify-between text-[9px] text-slate-700">
             <span>Email</span>
             <span>$12.40</span>
@@ -211,9 +207,11 @@ function CpaBreakdown() {
           <div className="h-[5px] overflow-hidden rounded-full bg-indigo-100">
             <div className="h-full w-[36%] bg-blue-700" />
           </div>
+
         </div>
 
       </div>
+
     </div>
   );
 }
@@ -230,6 +228,7 @@ function ConversionFunnel() {
 
         {/* Clicks */}
         <div className="flex h-7 items-center">
+
           <div className="w-[78px] pr-3 text-right text-[9px] text-slate-600">
             Clicks
           </div>
@@ -238,10 +237,12 @@ function ConversionFunnel() {
             <span>125,000</span>
             <span className="text-[8px]">100%</span>
           </div>
+
         </div>
 
         {/* Signups */}
         <div className="flex h-7 items-center">
+
           <div className="w-[78px] pr-3 text-right text-[9px] text-slate-600">
             Signups
           </div>
@@ -250,10 +251,12 @@ function ConversionFunnel() {
             <span>24,500</span>
             <span className="text-[8px]">19.6%</span>
           </div>
+
         </div>
 
         {/* Purchases */}
         <div className="flex h-7 items-center">
+
           <div className="w-[78px] pr-3 text-right text-[9px] text-slate-600">
             Purchases
           </div>
@@ -262,9 +265,11 @@ function ConversionFunnel() {
             <span>8,200</span>
             <span className="text-[8px]">6.5%</span>
           </div>
+
         </div>
 
       </div>
+
     </div>
   );
 }
@@ -273,8 +278,7 @@ function ActiveCampaigns() {
   return (
     <div className="overflow-hidden rounded-[9px] border border-slate-300 bg-white">
 
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 pt-3 pb-2">
+      <div className="flex items-center justify-between px-3 pb-2 pt-3">
 
         <h2 className="text-[14px] font-bold text-slate-800">
           Active Campaigns
@@ -286,10 +290,9 @@ function ActiveCampaigns() {
 
       </div>
 
-      {/* Table */}
       <div>
 
-        {/* Table header */}
+        {/* Header */}
         <div className="grid grid-cols-[2.4fr_1fr_.7fr_.6fr] items-center border-y border-slate-200 bg-slate-50 px-3 py-1.5 text-[8px] text-slate-500">
 
           <span>Campaign</span>
@@ -300,9 +303,9 @@ function ActiveCampaigns() {
         </div>
 
         {/* Rows */}
-        {campaigns.map((campaign, index) => (
+        {campaigns.map((campaign) => (
           <div
-            key={index}
+            key={campaign.name}
             className="grid min-h-7 grid-cols-[2.4fr_1fr_.7fr_.6fr] items-center border-b border-slate-200 px-3 text-[9px] text-slate-700 last:border-b-0"
           >
 
@@ -338,195 +341,115 @@ function ActiveCampaigns() {
 
 export default function CampaignAnalytics() {
   return (
-    <div className="flex min-h-screen bg-[#f6f8fc] font-sans text-slate-800">
+    <div className="min-h-screen bg-[#f8faff] text-slate-800">
 
-      {/* ================= SIDEBAR ================= */}
-      <aside className="hidden w-44 shrink-0 border-r border-[#d5ddec] bg-[#eef3ff] md:block">
+      <div className="flex min-h-screen">
 
-        {/* Brand */}
-        <div className="flex h-[49px] items-center gap-2 border-b border-[#d5ddec] px-5">
+        {/* SAME SIDEBAR AS DASHBOARD */}
+        <Sidebar />
 
-          <div className="relative h-5 w-5">
-            <div className="h-5 w-[18px] rounded-sm border border-slate-300 bg-white">
-              <div className="ml-1 mt-1 h-[2px] w-2 bg-[#7991bb] shadow-[0_4px_0_#7991bb,0_8px_0_#7991bb]" />
-            </div>
-          </div>
+        <main className="min-w-0 flex-1">
 
-          <div>
-            <div className="text-[15px] font-bold leading-[17px] text-[#0756c9]">
-              InfluenceIQ
-            </div>
+          {/* SAME TOPBAR AS DASHBOARD */}
+          <Topbar />
 
-            <div className="text-[8px] text-slate-500">
-              SaaS Analytics
-            </div>
-          </div>
+          <div className="px-6 py-5">
 
-        </div>
+            {/* Page Header */}
+            <div className="mb-5 flex items-start justify-between">
 
-        {/* Navigation */}
-        <nav className="flex flex-col gap-[3px] px-2 py-6">
+              <div>
+                <h1 className="text-xl font-semibold text-slate-900">
+                  Campaign Analytics
+                </h1>
 
-          {sidebarItems.map((item, index) => (
-            <div
-              key={index}
-              className={`flex h-7 cursor-pointer items-center gap-2 rounded-md px-2 text-[11px] ${
-                item.active
-                  ? "bg-[#dce6fa] font-semibold text-slate-600"
-                  : "text-slate-500 hover:bg-[#e4ebfa]"
-              }`}
-            >
+                <p className="mt-1 text-xs text-slate-500">
+                  Overview of active and past marketing initiatives.
+                </p>
+              </div>
 
-              <span className="w-3 text-center text-[13px]">
-                {item.icon}
-              </span>
+              <div className="flex items-center gap-2">
 
-              <span>{item.label}</span>
+                <button className="rounded-md border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600 hover:bg-slate-50">
+                  Export CSV
+                </button>
 
-            </div>
-          ))}
-
-        </nav>
-      </aside>
-
-      {/* ================= MAIN ================= */}
-      <main className="flex min-w-0 flex-1 flex-col">
-
-        {/* Topbar */}
-        <header className="flex h-[49px] items-center justify-between border-b border-[#d5ddec] bg-[#fbfcff] px-5">
-
-          {/* Search */}
-          <div className="ml-0 flex h-7 w-80 items-center rounded-full bg-[#f0f4fc] px-3 md:ml-28">
-
-            <span className="mr-2 text-[16px] text-slate-500">
-              ⌕
-            </span>
-
-            <input
-              type="text"
-              placeholder="Search campaigns..."
-              className="w-full bg-transparent text-[10px] text-slate-700 outline-none placeholder:text-slate-400"
-            />
-
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-3">
-
-            <button className="text-[16px] text-slate-500">
-              ♧
-            </button>
-
-            <button className="text-[16px] text-slate-500">
-              □
-            </button>
-
-            <div className="h-6 w-px bg-slate-300" />
-
-            <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full bg-blue-100 text-sm">
-              👨🏻
-            </div>
-
-          </div>
-
-        </header>
-
-        {/* Content */}
-        <section className="flex-1 px-5 py-6">
-
-          {/* Page heading */}
-          <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row">
-
-            <div>
-              <h1 className="text-[19px] font-bold leading-6 text-slate-800">
-                Campaign Analytics
-              </h1>
-
-              <p className="mt-0.5 text-[10px] text-slate-500">
-                Overview of active and past marketing initiatives.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-
-              <button className="h-7 rounded border border-slate-300 bg-white px-3 text-[10px] text-slate-700 hover:bg-slate-50">
-                Export CSV
-              </button>
-
-              <button className="h-7 rounded border border-blue-600 bg-blue-600 px-3 text-[10px] text-white hover:bg-blue-700">
-                New Campaign
-              </button>
-
-            </div>
-
-          </div>
-
-          {/* ================= TOP CARDS ================= */}
-          <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-[2.15fr_1fr]">
-
-            {/* ROI */}
-            <div className="h-[237px] rounded-[9px] border border-slate-300 bg-white p-3">
-
-              <div className="flex items-center justify-between">
-
-                <h2 className="text-[14px] font-bold text-slate-800">
-                  ROI Comparison
-                </h2>
-
-                <div className="flex gap-0.5 rounded bg-slate-50 p-1">
-
-                  <button className="rounded bg-white px-2 py-1 text-[9px] font-semibold text-slate-700 shadow-sm">
-                    30D
-                  </button>
-
-                  <button className="px-2 py-1 text-[9px] text-slate-500">
-                    90D
-                  </button>
-
-                  <button className="px-2 py-1 text-[9px] text-slate-500">
-                    1Y
-                  </button>
-
-                </div>
+                <button className="rounded-md bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700">
+                  New Campaign
+                </button>
 
               </div>
 
-              <RoiChart />
+            </div>
+
+            {/* Top Cards */}
+            <div className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-[2.15fr_1fr]">
+
+              {/* ROI */}
+              <div className="h-[237px] rounded-[9px] border border-slate-300 bg-white p-3">
+
+                <div className="flex items-center justify-between">
+
+                  <h2 className="text-[14px] font-bold text-slate-800">
+                    ROI Comparison
+                  </h2>
+
+                  <div className="flex gap-0.5 rounded bg-slate-50 p-1">
+
+                    <button className="rounded bg-white px-2 py-1 text-[9px] font-semibold text-slate-700 shadow-sm">
+                      30D
+                    </button>
+
+                    <button className="px-2 py-1 text-[9px] text-slate-500">
+                      90D
+                    </button>
+
+                    <button className="px-2 py-1 text-[9px] text-slate-500">
+                      1Y
+                    </button>
+
+                  </div>
+
+                </div>
+
+                <RoiChart />
+
+              </div>
+
+              <CpaBreakdown />
 
             </div>
 
-            {/* CPA */}
-            <CpaBreakdown />
+            {/* Bottom Cards */}
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.05fr_1fr]">
+
+              <ConversionFunnel />
+
+              <ActiveCampaigns />
+
+            </div>
 
           </div>
 
-          {/* ================= BOTTOM CARDS ================= */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.05fr_1fr]">
+          {/* Footer */}
+          <footer className="flex items-center justify-between border-t border-slate-200 px-6 py-3 text-[10px] text-slate-400">
 
-            <ConversionFunnel />
+            <span>
+              Built with Python • SQL • Pandas • NumPy • FastAPI • GitHub Actions
+            </span>
 
-            <ActiveCampaigns />
+            <div className="flex gap-4">
+              <span>Privacy</span>
+              <span>Terms</span>
+              <span>Support</span>
+            </div>
 
-          </div>
+          </footer>
 
-        </section>
+        </main>
 
-        {/* Footer */}
-        <footer className="flex h-6 items-center justify-between border-t border-[#d5ddec] bg-[#f7f9fd] px-5 text-[8px] text-slate-500">
+      </div>
 
-          <span>
-            Built with Python • SQL • Pandas • NumPy • Streamlit • GitHub Actions
-          </span>
-
-          <div className="hidden gap-5 sm:flex">
-            <span>Privacy</span>
-            <span>Terms</span>
-            <span>Support</span>
-          </div>
-
-        </footer>
-
-      </main>
     </div>
   );
 }
