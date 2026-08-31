@@ -5,5 +5,8 @@
     "dev": "bash ./start-dev.sh",
     "dev:backend": ". .venv/bin/activate && uvicorn backend.app.main:app --host 0.0.0.0 --port 8000",
     "dev:frontend": "cd client && npm run dev -- --host 127.0.0.1 --port 5173"
+  },
+  "dependencies": {
+    "vercel": "^59.10.0"
   }
 }
