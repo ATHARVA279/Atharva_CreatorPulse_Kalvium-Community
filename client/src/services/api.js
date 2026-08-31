@@ -1,4 +1,7 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:8000";
 
 async function apiFetch(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -11,7 +14,18 @@ async function apiFetch(path, options = {}) {
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || `Request failed: ${response.status}`);
+    let message = errorText || `Request failed: ${response.status}`;
+    try {
+      const errorBody = JSON.parse(errorText);
+      if (typeof errorBody?.detail === "string") {
+        message = errorBody.detail;
+      } else if (Array.isArray(errorBody?.detail) && errorBody.detail[0]?.msg) {
+        message = errorBody.detail[0].msg;
+      }
+    } catch {
+      // keep the raw error text
+    }
+    throw new Error(message);
   }
 
   return response.json();
@@ -26,6 +40,20 @@ function buildQueryString(filters = {}) {
   });
   const query = params.toString();
   return query ? `?${query}` : "";
+}
+
+export async function login(email, password) {
+  return apiFetch("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function signup(email, password, fullName = "") {
+  return apiFetch("/api/auth/signup", {
+    method: "POST",
+    body: JSON.stringify({ email, password, full_name: fullName }),
+  });
 }
 
 export async function getDashboardSummary(filters = {}) {

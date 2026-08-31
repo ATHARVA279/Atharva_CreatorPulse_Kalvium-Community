@@ -8,7 +8,15 @@ const RANGE_OPTIONS = [
   { value: "this_quarter", label: "This quarter" },
 ];
 
-export default function Topbar({ title, dateRange, onDateRangeChange, onRefresh, onExport }) {
+export default function Topbar({
+  title,
+  dateRange,
+  onDateRangeChange,
+  onRefresh,
+  onExport,
+  exporting = false,
+  showExport = true,
+}) {
   return (
     <header className="topbar">
       <div>
@@ -33,10 +41,17 @@ export default function Topbar({ title, dateRange, onDateRangeChange, onRefresh,
           Refresh
         </button>
 
-        <button type="button" className="toolbar-button primary" onClick={onExport}>
-          <Download size={14} />
-          Export
-        </button>
+        {showExport && (
+          <button
+            type="button"
+            className="toolbar-button primary"
+            onClick={onExport}
+            disabled={exporting}
+          >
+            <Download size={14} />
+            {exporting ? "Exporting..." : "Export"}
+          </button>
+        )}
       </div>
     </header>
   );
