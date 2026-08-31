@@ -50,6 +50,8 @@ Data layer:
 - `data/processed/` – generated processed outputs
 - `tests/` – automated tests for validation and API routes
 
+> Note: GitHub Actions is intentionally not included in this project.
+
 ### Frontend
 
 The frontend lives in `client/` and already contains the dashboard structure for:

@@ -29,8 +29,53 @@ def _safe_float(value):
         return 0.0
 
 
-def get_dashboard_summary():
+def _apply_filters(df: pd.DataFrame, **filters) -> pd.DataFrame:
+    df = df.copy()
+
+    # Creator filter (matches creator_id or creator_name)
+    creator = filters.get("creator") or filters.get("creator_id")
+    if creator:
+        df = df[
+            (df["creator_id"].astype(str).str.contains(str(creator), case=False, na=False)) |
+            (df["creator_name"].astype(str).str.contains(str(creator), case=False, na=False))
+        ]
+
+    # Campaign filter (matches campaign_id or campaign_name)
+    campaign = filters.get("campaign") or filters.get("campaign_id")
+    if campaign:
+        df = df[
+            (df["campaign_id"].astype(str).str.contains(str(campaign), case=False, na=False)) |
+            (df.get("campaign_name", pd.Series("", index=df.index)).astype(str).str.contains(str(campaign), case=False, na=False))
+        ]
+
+    # Date filters
+    date_from = filters.get("date_from") or filters.get("start_date")
+    if date_from:
+        df = df[df["campaign_date"] >= pd.to_datetime(date_from)]
+
+    date_to = filters.get("date_to") or filters.get("end_date")
+    if date_to:
+        df = df[df["campaign_date"] <= pd.to_datetime(date_to)]
+
+    # Traffic source filter
+    traffic_source = filters.get("traffic_source") or filters.get("source")
+    if traffic_source:
+        df = df[df["traffic_source"].astype(str).str.contains(str(traffic_source), case=False, na=False)]
+
+    # Category filter (matches product_category or category)
+    category = filters.get("product_category") or filters.get("category")
+    if category:
+        df = df[
+            (df.get("product_category", pd.Series("", index=df.index)).astype(str).str.contains(str(category), case=False, na=False)) |
+            (df.get("category", pd.Series("", index=df.index)).astype(str).str.contains(str(category), case=False, na=False))
+        ]
+
+    return df
+
+
+def get_dashboard_summary(**filters):
     df = _load_data()
+    df = _apply_filters(df, **filters)
     summary = {
         "total_campaigns": int(df["campaign_id"].nunique()),
         "total_creators": int(df["creator_id"].nunique()),
@@ -46,40 +91,37 @@ def get_dashboard_summary():
 
 def get_creator_rankings(**filters):
     df = _load_data()
-    if filters.get("creator"):
-        df = df[df["creator_name"].astype(str).str.contains(filters["creator"], case=False, na=False)]
-    if filters.get("campaign"):
-        df = df[df["campaign_id"].astype(str).str.contains(filters["campaign"], case=False, na=False)]
-    if filters.get("date_from"):
-        df = df[df["campaign_date"] >= pd.to_datetime(filters["date_from"]) ]
-    if filters.get("date_to"):
-        df = df[df["campaign_date"] <= pd.to_datetime(filters["date_to"]) ]
-    if filters.get("traffic_source"):
-        df = df[df["traffic_source"].astype(str).str.contains(filters["traffic_source"], case=False, na=False)]
-    if filters.get("product_category"):
-        df = df[df.get("product_category", pd.Series(["" for _ in range(len(df))], index=df.index)).astype(str).str.contains(filters["product_category"], case=False, na=False)]
-
+    df = _apply_filters(df, **filters)
     data = aggregate_creator_metrics(df)
-    return data[["creator_id", "creator_name", "engagement_rate", "ctr", "conversion_rate", "total_revenue", "revenue_per_click", "purchase_value", "creator_score"]].rename(columns={
+    return data[[
+        "creator_id", "creator_name", "campaign_count", "engagement_rate", "ctr", 
+        "conversion_rate", "total_purchases", "total_clicks", "repeat_purchase_rate", 
+        "total_revenue", "revenue_per_click", "purchase_value", "creator_score"
+    ]].rename(columns={
         "total_revenue": "revenue",
     }).to_dict(orient="records")
 
 
-def get_creator_detail(creator_id: str):
+def get_creator_detail(creator_id: str, **filters):
     df = _load_data()
-    creator_df = df[df["creator_id"].astype(str) == str(creator_id)]
-    if creator_df.empty:
+    df_filtered = _apply_filters(df, **filters)
+    
+    # Calculate score globally first to ensure consistency, then extract creator's row
+    global_creators = aggregate_creator_metrics(df_filtered)
+    creator_row = global_creators[global_creators["creator_id"].astype(str) == str(creator_id)]
+    if creator_row.empty:
         return {"error": "Creator not found"}
-    summary = aggregate_creator_metrics(creator_df).iloc[0].to_dict()
+        
+    summary = creator_row.iloc[0].to_dict()
     return {
         "creator_id": creator_id,
-        "creator_name": summary.get("creator_name", creator_df["creator_name"].iloc[0]),
-        "total_campaigns": int(creator_df["campaign_id"].nunique()),
-        "total_impressions": int(creator_df["impressions"].sum()),
-        "total_engagements": int(creator_df["engagements"].sum()),
-        "total_clicks": int(creator_df["clicks"].sum()),
-        "total_purchases": int(creator_df["purchases"].sum()),
-        "total_revenue": float(creator_df["revenue"].sum()),
+        "creator_name": summary.get("creator_name", ""),
+        "total_campaigns": int(summary.get("campaign_count", 0)),
+        "total_impressions": int(summary.get("total_impressions", 0)),
+        "total_engagements": int(summary.get("total_engagements", 0)),
+        "total_clicks": int(summary.get("total_clicks", 0)),
+        "total_purchases": int(summary.get("total_purchases", 0)),
+        "total_revenue": float(summary.get("total_revenue", 0.0)),
         "engagement_rate": float(summary.get("engagement_rate", 0.0)),
         "ctr": float(summary.get("ctr", 0.0)),
         "conversion_rate": float(summary.get("conversion_rate", 0.0)),
@@ -91,33 +133,20 @@ def get_creator_detail(creator_id: str):
 
 def get_campaigns(**filters):
     df = _load_data()
-    if filters.get("creator"):
-        df = df[df["creator_name"].astype(str).str.contains(filters["creator"], case=False, na=False)]
-    if filters.get("campaign"):
-        df = df[df["campaign_id"].astype(str).str.contains(filters["campaign"], case=False, na=False)]
-    if filters.get("date_from"):
-        df = df[df["campaign_date"] >= pd.to_datetime(filters["date_from"])]
-    if filters.get("date_to"):
-        df = df[df["campaign_date"] <= pd.to_datetime(filters["date_to"])]
+    df = _apply_filters(df, **filters)
     return aggregate_campaign_metrics(df).to_dict(orient="records")
 
 
 def get_referral_sources(**filters):
     df = _load_data()
-    if filters.get("creator"):
-        df = df[df["creator_name"].astype(str).str.contains(filters["creator"], case=False, na=False)]
-    if filters.get("campaign"):
-        df = df[df["campaign_id"].astype(str).str.contains(filters["campaign"], case=False, na=False)]
-    if filters.get("date_from"):
-        df = df[df["campaign_date"] >= pd.to_datetime(filters["date_from"])]
-    if filters.get("date_to"):
-        df = df[df["campaign_date"] <= pd.to_datetime(filters["date_to"])]
+    df = _apply_filters(df, **filters)
     data = aggregate_traffic_source_metrics(df)
     return data.rename(columns={"traffic_source": "source_name"}).to_dict(orient="records")
 
 
-def get_funnel():
+def get_funnel(**filters):
     df = _load_data()
+    df = _apply_filters(df, **filters)
     return {
         "impressions": int(df["impressions"].sum()),
         "engagements": int(df["engagements"].sum()),
@@ -128,22 +157,25 @@ def get_funnel():
 
 def get_revenue(**filters):
     df = _load_data()
-    if filters.get("creator"):
-        df = df[df["creator_name"].astype(str).str.contains(filters["creator"], case=False, na=False)]
-    if filters.get("campaign"):
-        df = df[df["campaign_id"].astype(str).str.contains(filters["campaign"], case=False, na=False)]
-    grouped = df.groupby(["creator_id", "creator_name"], dropna=False)["revenue"].sum().reset_index()
+    df = _apply_filters(df, **filters)
+    # Group by creator and aggregate revenue, purchases, and clicks
+    grouped = df.groupby(["creator_id", "creator_name"], dropna=False).agg(
+        revenue=("revenue", "sum"),
+        purchases=("purchases", "sum"),
+        clicks=("clicks", "sum"),
+    ).reset_index()
     return grouped.rename(columns={"creator_name": "name"}).to_dict(orient="records")
 
 
 def get_purchase_behaviour(**filters):
     df = _load_data()
-    if filters.get("creator"):
-        df = df[df["creator_name"].astype(str).str.contains(filters["creator"], case=False, na=False)]
-    if filters.get("campaign"):
-        df = df[df["campaign_id"].astype(str).str.contains(filters["campaign"], case=False, na=False)]
+    df = _apply_filters(df, **filters)
+    repeat_purchases = float(df["repeat_purchases"].sum()) if "repeat_purchases" in df.columns else 0.0
+    purchases = float(df["purchases"].sum())
+    repeat_purchase_rate = (repeat_purchases / purchases * 100.0) if purchases > 0 else 0.0
+    
     return {
-        "repeat_purchase_rate": 0.0,
+        "repeat_purchase_rate": repeat_purchase_rate,
         "purchase_frequency": 0.0,
-        "notes": "Repeat-purchase metrics are only available when a longitudinal customer purchase history exists in the dataset.",
+        "notes": "Repeat-purchase metrics calculated from dataset.",
     }

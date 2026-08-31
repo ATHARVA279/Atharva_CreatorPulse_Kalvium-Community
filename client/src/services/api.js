@@ -1,9 +1,9 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 async function apiFetch(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(options.headers || {}),
     },
     ...options,
@@ -17,50 +17,47 @@ async function apiFetch(path, options = {}) {
   return response.json();
 }
 
-export async function getDashboardSummary() {
-  return apiFetch('/api/dashboard/summary');
+function buildQueryString(filters = {}) {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      params.append(key, value);
+    }
+  });
+  const query = params.toString();
+  return query ? `?${query}` : "";
+}
+
+export async function getDashboardSummary(filters = {}) {
+  return apiFetch(`/api/dashboard/summary${buildQueryString(filters)}`);
 }
 
 export async function getCreatorRankings(filters = {}) {
-  const params = new URLSearchParams();
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      params.append(key, value);
-    }
-  });
-  const query = params.toString() ? `?${params.toString()}` : '';
-  return apiFetch(`/api/creators${query}`);
+  return apiFetch(`/api/creators${buildQueryString(filters)}`);
+}
+
+export async function getCreatorDetail(creatorId, filters = {}) {
+  return apiFetch(`/api/creators/${encodeURIComponent(creatorId)}${buildQueryString(filters)}`);
 }
 
 export async function getCampaigns(filters = {}) {
-  const params = new URLSearchParams();
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      params.append(key, value);
-    }
-  });
-  const query = params.toString() ? `?${params.toString()}` : '';
-  return apiFetch(`/api/campaigns${query}`);
+  return apiFetch(`/api/campaigns${buildQueryString(filters)}`);
 }
 
 export async function getReferralSources(filters = {}) {
-  const params = new URLSearchParams();
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      params.append(key, value);
-    }
-  });
-  const query = params.toString() ? `?${params.toString()}` : '';
-  return apiFetch(`/api/referral-sources${query}`);
+  return apiFetch(`/api/referral-sources${buildQueryString(filters)}`);
 }
 
 export async function getRevenue(filters = {}) {
-  const params = new URLSearchParams();
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      params.append(key, value);
-    }
-  });
-  const query = params.toString() ? `?${params.toString()}` : '';
-  return apiFetch(`/api/revenue${query}`);
+  return apiFetch(`/api/revenue${buildQueryString(filters)}`);
 }
+
+export async function getFunnel(filters = {}) {
+  return apiFetch(`/api/funnel${buildQueryString(filters)}`);
+}
+
+export async function getPurchaseBehaviour(filters = {}) {
+  return apiFetch(`/api/purchase-behaviour${buildQueryString(filters)}`);
+}
+
+export { API_BASE_URL };

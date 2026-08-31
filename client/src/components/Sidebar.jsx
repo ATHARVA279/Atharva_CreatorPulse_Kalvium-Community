@@ -16,70 +16,55 @@ import {
 
 const menuItems = [
   {
+    key: "overview",
     label: "Dashboard",
     icon: LayoutDashboard,
-    path: "/dashboard",
+    path: "/overview",
   },
   {
+    key: "campaigns",
     label: "Campaign Analytics",
     icon: Megaphone,
-    path: "/campaign-analytics",
+    path: "/campaigns",
   },
   {
+    key: "creators",
     label: "Creators",
     icon: Users,
     path: "/creators",
   },
   {
-    label: "Customers",
-    icon: UserRound,
-    path: "/customers",
-  },
-  {
+    key: "referrals",
     label: "Referral Tracking",
     icon: Share2,
-    path: "/referral-tracking",
+    path: "/referrals",
   },
   {
+    key: "revenue",
     label: "Revenue Analytics",
     icon: DollarSign,
-    path: "/revenue-analytics",
-  },
-  {
-    label: "CLV",
-    icon: TrendingUp,
-    path: "/clv",
-  },
-  {
-    label: "Retention Analysis",
-    icon: RefreshCcw,
-    path: "/retention-analysis",
-  },
-  {
-    label: "SQL Explorer",
-    icon: Database,
-    path: "/sql-explorer",
+    path: "/revenue",
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ activePage, onNavigate }) {
   return (
-    <aside className="hidden lg:flex w-[176px] shrink-0 bg-[#eef3ff] border-r border-slate-200 flex-col min-h-screen">
+    <aside className="hidden lg:flex w-[220px] shrink-0 bg-[#eef3ff] border-r border-slate-200 flex-col h-screen sticky top-0 overflow-hidden">
 
       {/* Logo */}
-      <div className="h-16 px-4 flex items-center border-b border-slate-200">
-        <div className="flex items-center gap-2">
+      <div className="h-20 px-4 flex items-center border-b border-slate-200">
+        <div className="flex items-center gap-3">
 
-          <div className="w-6 h-6 rounded-md bg-blue-600 flex items-center justify-center">
-            <TrendingUp size={14} className="text-white" />
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
+            <TrendingUp size={16} className="text-white" />
           </div>
 
           <div>
-            <p className="text-[12px] font-bold text-blue-700 leading-none">
+            <p className="text-[13px] font-bold text-blue-700 leading-none">
               CreatorPulse
             </p>
 
-            <p className="text-[7px] text-slate-400 mt-1">
+            <p className="text-[9px] text-slate-400 mt-1 uppercase tracking-[0.12em]">
               Campaign Analytics
             </p>
           </div>
@@ -88,25 +73,27 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="p-3 flex-1">
-        <div className="space-y-1">
+      <nav className="p-4 pt-5 flex-1">
+        <div className="space-y-1.5">
 
           {menuItems.map((item) => {
             const Icon = item.icon;
+            const isActive = activePage === item.key;
 
             return (
               <NavLink
                 key={item.label}
                 to={item.path}
-                className={({ isActive }) =>
-                  `w-full flex items-center gap-2 px-2 py-2 rounded-md text-[9px] text-left transition ${
+                onClick={() => onNavigate(item.key)}
+                className={() =>
+                  `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-left transition-all duration-200 ${
                     isActive
-                      ? "bg-[#dce7ff] text-blue-700 font-medium"
-                      : "text-slate-600 hover:bg-white"
+                      ? "bg-[#d9e7ff] text-blue-700 font-semibold shadow-sm ring-1 ring-blue-100"
+                      : "text-slate-600 hover:bg-white hover:text-slate-900"
                   }`
                 }
               >
-                <Icon size={13} />
+                <Icon size={15} />
 
                 <span className="leading-tight">
                   {item.label}
@@ -119,18 +106,18 @@ export default function Sidebar() {
       </nav>
 
       {/* Settings */}
-      <div className="p-3 border-t border-slate-200">
+      <div className="p-4 border-t border-slate-200">
         <NavLink
           to="/settings"
           className={({ isActive }) =>
-            `w-full flex items-center gap-2 px-2 py-2 rounded-md text-[9px] ${
+            `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] ${
               isActive
-                ? "bg-[#dce7ff] text-blue-700 font-medium"
-                : "text-slate-600 hover:bg-white"
+                ? "bg-[#d9e7ff] text-blue-700 font-semibold shadow-sm ring-1 ring-blue-100"
+                : "text-slate-600 hover:bg-white hover:text-slate-900"
             }`
           }
         >
-          <Settings size={13} />
+          <Settings size={15} />
           <span>Settings</span>
         </NavLink>
       </div>

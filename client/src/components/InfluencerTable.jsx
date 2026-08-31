@@ -9,7 +9,7 @@ export default function InfluencerTable({ data = [], loading = false }) {
         clicks: Number(person.total_clicks || person.ctr || 0),
         purchases: Number(person.total_purchases || 0),
         revenue: Number(person.revenue || person.total_revenue || 0),
-        repeat: Number(person.conversion_rate || 0),
+        repeat: Number(person.repeat_purchase_rate || 0),
         clv: Number(person.purchase_value || 0),
         score: Number(person.creator_score || 0),
         initials: (person.creator_name || "U")

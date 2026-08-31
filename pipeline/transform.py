@@ -30,7 +30,11 @@ def add_derived_metrics(df: pd.DataFrame) -> pd.DataFrame:
     df["click_timestamp"] = pd.to_datetime(df["click_timestamp"], errors="coerce")
     df["purchase_timestamp"] = pd.to_datetime(df["purchase_timestamp"], errors="coerce")
 
-    df["engagements"] = df[[col for col in ["likes", "comments", "shares"] if col in df.columns]].fillna(0).sum(axis=1)
+    if "total_engagements" in df.columns:
+        df["engagements"] = pd.to_numeric(df["total_engagements"], errors="coerce").fillna(0)
+    else:
+        df["engagements"] = df[[col for col in ["likes", "comments", "shares"] if col in df.columns]].fillna(0).sum(axis=1)
+
     df["impressions"] = pd.to_numeric(df["impressions"], errors="coerce").fillna(0)
     df["order_value"] = pd.to_numeric(df["order_value"], errors="coerce").fillna(0)
 
@@ -47,7 +51,7 @@ def add_derived_metrics(df: pd.DataFrame) -> pd.DataFrame:
     if "revenue" in df.columns:
         df["revenue"] = pd.to_numeric(df["revenue"], errors="coerce").fillna(0)
     else:
-        df["revenue"] = df["order_value"]
+        df["revenue"] = pd.to_numeric(df["order_value"], errors="coerce").fillna(0)
 
     df["engagement_rate"] = df.apply(lambda row: safe_divide(row["engagements"], row["impressions"], 0.0) * 100.0, axis=1)
     df["ctr"] = df.apply(lambda row: safe_divide(row["clicks"], row["impressions"], 0.0) * 100.0, axis=1)
@@ -92,14 +96,31 @@ def aggregate_creator_metrics(df: pd.DataFrame) -> pd.DataFrame:
         total_clicks=("clicks", "sum"),
         total_purchases=("purchases", "sum"),
         total_revenue=("revenue", "sum"),
+        total_repeat_purchases=("repeat_purchases", "sum") if "repeat_purchases" in df.columns else ("purchases", lambda x: 0),
     ).reset_index()
+
+    if "total_repeat_purchases" not in grouped.columns:
+        grouped["total_repeat_purchases"] = 0
 
     grouped["engagement_rate"] = grouped.apply(lambda row: safe_divide(row["total_engagements"], row["total_impressions"], 0.0) * 100.0, axis=1)
     grouped["ctr"] = grouped.apply(lambda row: safe_divide(row["total_clicks"], row["total_impressions"], 0.0) * 100.0, axis=1)
     grouped["conversion_rate"] = grouped.apply(lambda row: safe_divide(row["total_purchases"], row["total_clicks"], 0.0) * 100.0, axis=1)
     grouped["revenue_per_click"] = grouped.apply(lambda row: safe_divide(row["total_revenue"], row["total_clicks"], 0.0), axis=1)
     grouped["purchase_value"] = grouped.apply(lambda row: safe_divide(row["total_revenue"], row["total_purchases"], 0.0), axis=1)
-    grouped["creator_score"] = grouped.apply(lambda row: row["engagement_rate"] * 0.3 + row["conversion_rate"] * 0.3 + row["revenue_per_click"] * 0.2 + row["purchase_value"] * 0.2, axis=1)
+    grouped["repeat_purchase_rate"] = grouped.apply(lambda row: safe_divide(row["total_repeat_purchases"], row["total_purchases"], 0.0) * 100.0, axis=1)
+
+    # Normalize metrics across all aggregated creators for the creator score
+    norm_eng = normalize_series(grouped["engagement_rate"])
+    norm_conv = normalize_series(grouped["conversion_rate"])
+    norm_rpc = normalize_series(grouped["revenue_per_click"])
+    norm_pv = normalize_series(grouped["purchase_value"])
+
+    grouped["creator_score"] = (
+        norm_eng * 0.30
+        + norm_conv * 0.30
+        + norm_rpc * 0.20
+        + norm_pv * 0.20
+    ) * 100.0
 
     return grouped
 

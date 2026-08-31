@@ -36,10 +36,10 @@ def validate_dataframe(df: pd.DataFrame) -> Dict[str, List[str]]:
         errors.append(f"Missing required columns: {', '.join(missing)}")
 
     if df.duplicated(subset=list(df.columns)).any():
-        errors.append("Duplicate rows detected.")
+        warnings.append("Duplicate rows detected.")
 
     if "transaction_id" in df.columns and df["transaction_id"].duplicated().any():
-        errors.append("Duplicate transaction IDs detected.")
+        warnings.append("Duplicate transaction IDs detected.")
 
     if "campaign_date" in df.columns:
         bad_dates = df.loc[~pd.to_datetime(df["campaign_date"], errors="coerce").notna(), "campaign_date"]
@@ -52,9 +52,22 @@ def validate_dataframe(df: pd.DataFrame) -> Dict[str, List[str]]:
             errors.append(f"Invalid click timestamps found: {bad_clicks.head(5).tolist()}")
 
     if "purchase_timestamp" in df.columns:
-        bad_purchases = df.loc[~pd.to_datetime(df["purchase_timestamp"], errors="coerce").notna(), "purchase_timestamp"]
+        non_null_purchase_rows = df["purchase_timestamp"].notna() & df["purchase_timestamp"].astype(str).str.strip().ne("")
+        bad_purchases = df.loc[
+            non_null_purchase_rows & ~pd.to_datetime(df["purchase_timestamp"], errors="coerce").notna(),
+            "purchase_timestamp",
+        ]
         if not bad_purchases.empty:
             errors.append(f"Invalid purchase timestamps found: {bad_purchases.head(5).tolist()}")
+
+    if "transaction_id" in df.columns:
+        non_null_txn_rows = df["transaction_id"].notna() & df["transaction_id"].astype(str).str.strip().ne("")
+        bad_txn_ids = df.loc[
+            non_null_txn_rows & df["transaction_id"].astype(str).str.strip().eq(""),
+            "transaction_id",
+        ]
+        if not bad_txn_ids.empty:
+            warnings.append("Blank transaction IDs were found in non-purchase rows.")
 
     numeric_columns = [
         "impressions",
