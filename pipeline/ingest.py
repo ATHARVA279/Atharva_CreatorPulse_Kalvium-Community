@@ -27,6 +27,7 @@ FIELD_ALIASES = {
     "likes": ["likes", "total_likes"],
     "comments": ["comments", "total_comments"],
     "shares": ["shares", "total_shares"],
+    "total_engagements": ["total_engagements", "engagements", "engagement_count"],
     "referral_id": ["referral_id", "referralid", "referral id", "click_id"],
     "traffic_source": ["traffic_source", "source", "channel", "referrer", "traffic source"],
     "click_timestamp": ["click_timestamp", "click_time", "clicked_at", "timestamp"],
@@ -35,6 +36,7 @@ FIELD_ALIASES = {
     "purchase_timestamp": ["purchase_timestamp", "order_timestamp", "purchase_time", "purchased_at"],
     "order_value": ["order_value", "amount", "revenue", "order_value_usd", "total_value"],
     "clicks": ["clicks", "click_count", "referral_clicks", "total_clicks"],
+    "purchases": ["purchases", "purchase_count", "total_purchases"],
 }
 
 
@@ -53,7 +55,9 @@ def match_columns(df: pd.DataFrame) -> Dict[str, str]:
 
 def standardize_columns(df: pd.DataFrame) -> pd.DataFrame:
     mapped = match_columns(df)
-    standardized = df.rename(columns=mapped).copy()
+    # Reversing the mapping: pandas rename expects {old_name: new_name}
+    rename_map = {v: k for k, v in mapped.items()}
+    standardized = df.rename(columns=rename_map).copy()
 
     if "campaign_id" not in standardized.columns:
         standardized["campaign_id"] = "unknown"

@@ -32,6 +32,61 @@ def test_validate_dataframe_accepts_clean_data():
     assert result["warnings"] == []
 
 
+def test_validate_dataframe_warns_on_duplicate_rows():
+    row = {
+        "campaign_id": "CAMP-003",
+        "creator_id": "CR-3",
+        "creator_name": "Aisha Khan",
+        "campaign_date": "2026-01-15",
+        "impressions": 1500,
+        "likes": 240,
+        "comments": 60,
+        "shares": 30,
+        "referral_id": "REF-003",
+        "traffic_source": "Instagram",
+        "click_timestamp": "2026-01-16 09:00:00",
+        "customer_id": "CUST-300",
+        "transaction_id": "TXN-300",
+        "purchase_timestamp": "2026-01-17 10:30:00",
+        "order_value": 92.5,
+    }
+    df = pd.DataFrame([row, row])
+
+    result = validate_dataframe(df)
+
+    assert "Duplicate rows detected." in result["warnings"]
+    assert result["errors"] == []
+
+
+def test_validate_dataframe_allows_non_purchase_rows_without_transaction_data():
+    df = pd.DataFrame(
+        [
+            {
+                "campaign_id": "CAMP-004",
+                "creator_id": "CR-4",
+                "creator_name": "Ariana Shah",
+                "campaign_date": "2026-05-02",
+                "impressions": 5000,
+                "likes": 120,
+                "comments": 18,
+                "shares": 9,
+                "referral_id": "REF-004",
+                "traffic_source": "Instagram",
+                "click_timestamp": "2026-05-02 12:00:00",
+                "customer_id": None,
+                "transaction_id": None,
+                "purchase_timestamp": None,
+                "order_value": 0,
+                "purchases": 0,
+            }
+        ]
+    )
+
+    result = validate_dataframe(df)
+
+    assert result["errors"] == []
+
+
 def test_validate_dataframe_rejects_invalid_values():
     df = pd.DataFrame(
         [
