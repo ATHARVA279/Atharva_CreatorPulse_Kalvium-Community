@@ -47,7 +47,7 @@ const menuItems = [
   },
 ];
 
-export default function Sidebar({ activePage, onNavigate }) {
+export default function Sidebar() {
   return (
     <aside className="hidden lg:flex w-[220px] shrink-0 bg-[#eef3ff] border-r border-slate-200 flex-col h-screen sticky top-0 overflow-hidden">
 
@@ -78,14 +78,12 @@ export default function Sidebar({ activePage, onNavigate }) {
 
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activePage === item.key;
 
             return (
               <NavLink
                 key={item.label}
                 to={item.path}
-                onClick={() => onNavigate(item.key)}
-                className={() =>
+                className={({ isActive }) =>
                   `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-left transition-all duration-200 ${
                     isActive
                       ? "bg-[#d9e7ff] text-blue-700 font-semibold shadow-sm ring-1 ring-blue-100"
